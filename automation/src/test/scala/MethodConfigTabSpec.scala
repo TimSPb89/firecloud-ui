@@ -12,11 +12,12 @@ class MethodConfigTabSpec extends FreeSpec with WebBrowserSpec with CleanUp {
   val methodConfigName: String = "test_method" + UUID.randomUUID().toString
   val wrongRootEntityErrorText: String = "Error: Method configuration expects an entity of type sample, but you gave us an entity of type participant."
   val noExpressionErrorText: String = "Error: Method configuration expects an entity of type sample, but you gave us an entity of type sample_set."
+  val missingInputsErrorText: String = "is missing definitions for these inputs:"
 
   implicit val authToken: AuthToken = AuthTokens.hermione
   val uiUser: Credentials = Config.Users.hermione
 
-  "launch a simple workflow" ignore withWebDriver { implicit driver =>
+  "launch a simple workflow" in withWebDriver { implicit driver =>
     val wsName = "TestSpec_FireCloud_launch_a_simple_workflow" + UUID.randomUUID.toString
     api.workspaces.create(billingProject, wsName)
     register cleanUp api.workspaces.delete(billingProject, wsName)
@@ -33,7 +34,7 @@ class MethodConfigTabSpec extends FreeSpec with WebBrowserSpec with CleanUp {
     assert(submissionDetailsPage.verifyWorkflowSucceeded())
   }
 
-  "launch modal with no default entities" ignore withWebDriver { implicit driver =>
+  "launch modal with no default entities" in withWebDriver { implicit driver =>
     val wsName = "TestSpec_FireCloud_launch_modal_no_default_entities" + UUID.randomUUID.toString
     api.workspaces.create(billingProject, wsName)
     register cleanUp api.workspaces.delete(billingProject, wsName)
@@ -50,7 +51,7 @@ class MethodConfigTabSpec extends FreeSpec with WebBrowserSpec with CleanUp {
     launchModal.closeModal()
   }
 
-  "launch modal with workflows warning" ignore withWebDriver { implicit driver =>
+  "launch modal with workflows warning" in withWebDriver { implicit driver =>
     val wsName = "TestSpec_FireCloud_launch_modal_with_workflows_warning" + UUID.randomUUID.toString
     api.workspaces.create(billingProject, wsName)
     register cleanUp api.workspaces.delete(billingProject, wsName)
@@ -74,7 +75,7 @@ class MethodConfigTabSpec extends FreeSpec with WebBrowserSpec with CleanUp {
     launchModal.closeModal()
   }
 
-  "launch workflow with wrong root entity" ignore withWebDriver { implicit driver =>
+  "launch workflow with wrong root entity" in withWebDriver { implicit driver =>
     val wsName = "TestSpec_FireCloud_launch_workflow_with_wrong_root_entity" + UUID.randomUUID.toString
     api.workspaces.create(billingProject, wsName)
     register cleanUp api.workspaces.delete(billingProject, wsName)
@@ -96,7 +97,7 @@ class MethodConfigTabSpec extends FreeSpec with WebBrowserSpec with CleanUp {
     launchModal.closeModal()
   }
 
-  "launch workflow on set without expression" ignore withWebDriver { implicit driver =>
+  "launch workflow on set without expression" in withWebDriver { implicit driver =>
     val wsName = "TestSpec_FireCloud_launch_workflow_on_set_without_expression" + UUID.randomUUID.toString
 
     api.workspaces.create(billingProject, wsName)
@@ -124,7 +125,7 @@ class MethodConfigTabSpec extends FreeSpec with WebBrowserSpec with CleanUp {
   "launch workflow with input not defined" in withWebDriver { implicit driver =>
     val wsName = "TestSpec_FireCloud_launch_workflow_input_not_defined" + UUID.randomUUID.toString
     api.workspaces.create(billingProject, wsName)
-//    register cleanUp api.workspaces.delete(billingProject, wsName)
+    register cleanUp api.workspaces.delete(billingProject, wsName)
     api.importMetaData(billingProject, wsName, "entities", TestData.SingleParticipant.participantEntity)
 
     signIn(uiUser)
@@ -132,9 +133,13 @@ class MethodConfigTabSpec extends FreeSpec with WebBrowserSpec with CleanUp {
     workspaceMethodConfigPage.open
     val methodConfigDetailsPage = workspaceMethodConfigPage.importMethodConfigFromRepo(TestData.InputRequiredMethodConfig.namespace,
       TestData.InputRequiredMethodConfig.name, TestData.InputRequiredMethodConfig.snapshotId, methodConfigName, TestData.InputRequiredMethodConfig.rootEntityType)
-    val submissionDetailsPage = methodConfigDetailsPage.launchAnalysis(TestData.SimpleMethodConfig.rootEntityType, TestData.SingleParticipant.entityId)
-    submissionDetailsPage.waitUntilSubmissionCompletes()  //This feels like the wrong way to do this?
-    assert(submissionDetailsPage.verifyWorkflowFailed())
+
+    val launchModal = methodConfigDetailsPage.openlaunchModal()
+    launchModal.filterRootEntityType(TestData.InputRequiredMethodConfig.rootEntityType)
+    launchModal.searchAndSelectEntity(TestData.SingleParticipant.entityId)
+    launchModal.clickLaunchButton()
+    assert(launchModal.verifyMissingInputsError(missingInputsErrorText))
+    launchModal.closeModal()
   }
 
   "import a method config from a workspace" in withWebDriver { implicit driver =>
