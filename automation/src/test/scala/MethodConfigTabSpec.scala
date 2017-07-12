@@ -50,7 +50,7 @@ class MethodConfigTabSpec extends FreeSpec with WebBrowserSpec with CleanUp {
     launchModal.closeModal()
   }
 
-  "launch modal with workflows warning" in withWebDriver { implicit driver =>
+  "launch modal with workflows warning" ignore withWebDriver { implicit driver =>
     val wsName = "TestSpec_FireCloud_launch_modal_with_workflows_warning" + UUID.randomUUID.toString
     api.workspaces.create(billingProject, wsName)
     register cleanUp api.workspaces.delete(billingProject, wsName)
@@ -130,8 +130,8 @@ class MethodConfigTabSpec extends FreeSpec with WebBrowserSpec with CleanUp {
     signIn(uiUser)
     val workspaceMethodConfigPage = new WorkspaceMethodConfigPage(billingProject, wsName)
     workspaceMethodConfigPage.open
-    val methodConfigDetailsPage = workspaceMethodConfigPage.importMethodConfigFromRepo(TestData.SimpleMethodConfig.namespace,
-      TestData.SimpleMethodConfig.name, TestData.SimpleMethodConfig.snapshotId, methodConfigName, TestData.SimpleMethodConfig.rootEntityType)
+    val methodConfigDetailsPage = workspaceMethodConfigPage.importMethodConfigFromRepo(TestData.InputRequiredMethodConfig.namespace,
+      TestData.InputRequiredMethodConfig.name, TestData.InputRequiredMethodConfig.snapshotId, methodConfigName, TestData.InputRequiredMethodConfig.rootEntityType)
     val submissionDetailsPage = methodConfigDetailsPage.launchAnalysis(TestData.SimpleMethodConfig.rootEntityType, TestData.SingleParticipant.entityId)
     submissionDetailsPage.waitUntilSubmissionCompletes()  //This feels like the wrong way to do this?
     assert(submissionDetailsPage.verifyWorkflowFailed())
