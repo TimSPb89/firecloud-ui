@@ -16,7 +16,7 @@ class MethodConfigTabSpec extends FreeSpec with WebBrowserSpec with CleanUp {
   implicit val authToken: AuthToken = AuthTokens.hermione
   val uiUser: Credentials = Config.Users.hermione
 
-  "launch a simple workflow" in withWebDriver { implicit driver =>
+  "launch a simple workflow" ignore withWebDriver { implicit driver =>
     val wsName = "TestSpec_FireCloud_launch_a_simple_workflow" + UUID.randomUUID.toString
     api.workspaces.create(billingProject, wsName)
     register cleanUp api.workspaces.delete(billingProject, wsName)
@@ -33,7 +33,7 @@ class MethodConfigTabSpec extends FreeSpec with WebBrowserSpec with CleanUp {
     assert(submissionDetailsPage.verifyWorkflowSucceeded())
   }
 
-  "launch modal with no default entities" in withWebDriver { implicit driver =>
+  "launch modal with no default entities" ignore withWebDriver { implicit driver =>
     val wsName = "TestSpec_FireCloud_launch_modal_no_default_entities" + UUID.randomUUID.toString
     api.workspaces.create(billingProject, wsName)
     register cleanUp api.workspaces.delete(billingProject, wsName)
@@ -74,7 +74,7 @@ class MethodConfigTabSpec extends FreeSpec with WebBrowserSpec with CleanUp {
     launchModal.closeModal()
   }
 
-  "launch workflow with wrong root entity" in withWebDriver { implicit driver =>
+  "launch workflow with wrong root entity" ignore withWebDriver { implicit driver =>
     val wsName = "TestSpec_FireCloud_launch_workflow_with_wrong_root_entity" + UUID.randomUUID.toString
     api.workspaces.create(billingProject, wsName)
     register cleanUp api.workspaces.delete(billingProject, wsName)
@@ -96,7 +96,7 @@ class MethodConfigTabSpec extends FreeSpec with WebBrowserSpec with CleanUp {
     launchModal.closeModal()
   }
 
-  "launch workflow on set without expression" in withWebDriver { implicit driver =>
+  "launch workflow on set without expression" ignore withWebDriver { implicit driver =>
     val wsName = "TestSpec_FireCloud_launch_workflow_on_set_without_expression" + UUID.randomUUID.toString
 
     api.workspaces.create(billingProject, wsName)
@@ -124,7 +124,7 @@ class MethodConfigTabSpec extends FreeSpec with WebBrowserSpec with CleanUp {
   "launch workflow with input not defined" in withWebDriver { implicit driver =>
     val wsName = "TestSpec_FireCloud_launch_workflow_input_not_defined" + UUID.randomUUID.toString
     api.workspaces.create(billingProject, wsName)
-    register cleanUp api.workspaces.delete(billingProject, wsName)
+//    register cleanUp api.workspaces.delete(billingProject, wsName)
     api.importMetaData(billingProject, wsName, "entities", TestData.SingleParticipant.participantEntity)
 
     signIn(uiUser)
