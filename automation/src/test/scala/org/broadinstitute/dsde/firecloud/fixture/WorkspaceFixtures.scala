@@ -23,7 +23,7 @@ trait WorkspaceFixtures extends CleanUp { self: WebBrowserSpec with Suite =>
     * @param token auth token for service API calls
     */
   def withWorkspace(namespace: String, namePrefix: String, authDomain: Option[String] = None,
-                    aclEntries: List[AclEntry] = List())
+                    aclEntries: List[AclEntry] = List(), cleanup: Boolean = true)
                    (testCode: (String) => Any)(implicit token: AuthToken): Unit = {
     val workspaceName = appendUnderscore(namePrefix) + makeUuid
     api.workspaces.create(namespace, workspaceName, authDomain)
@@ -32,7 +32,8 @@ trait WorkspaceFixtures extends CleanUp { self: WebBrowserSpec with Suite =>
       testCode(workspaceName)
     } finally {
       try {
-        api.workspaces.delete(namespace, workspaceName)
+        if (cleanup)
+          api.workspaces.delete(namespace, workspaceName)
       } catch nonFatalAndLog(s"Error deleting workspace in withWorkspace clean-up: $namespace/$workspaceName")
     }
   }
