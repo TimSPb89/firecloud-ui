@@ -119,7 +119,7 @@
            set-discoverable? (or can-share? catalog-with-any-access? owner?)]
        ;; FIXME: refactor -- this is heavily copy/pasted from OKCancelForm
        [:div {}
-        (when (:submitting? @state)
+        (when (or (:submitting-groups? @state) (:submitting-attributes? @state))
           [comps/Blocker {:banner "Submitting..."}])
         [:div {:style {:borderBottom style/standard-line
                        :padding "20px 48px 18px"
@@ -236,22 +236,32 @@
      ;; metadata and we automatically republish when we save metadata if it's currently published
      (if (and (:published? @state) (not-empty (:invalid-properties @state)))
        (swap! state assoc :validation-error "You will need to complete all required metadata attributes to be able to re-publish the workspace in the Data Library")
-       (let [attributes-seen (utils/log (apply merge (vals (select-keys (:page-attributes @locals) (:pages-stack @state)))))
-             discoverable-by (utils/log (select-keys attributes-seen [:library:discoverableByGroups]))
-             data (utils/log (library-utils/remove-empty-values (merge attributes-seen (:version-attributes @state))))
-             invoke-args (cond (and set-discoverable? (not editable?))
-                               {:name endpoints/save-discoverable-by-groups :data discoverable-by}
-                               (and (not set-discoverable?) editable?)
-                               {:name endpoints/save-library-metadata :data data}
-                               :else {:name endpoints/save-library-metadata :data (merge data discoverable-by)})]
-             (swap! state assoc :submitting? true :submit-error nil)
-             (endpoints/call-ajax-orch
-              {:endpoint ((:name invoke-args) (:workspace-id props))
-               :payload (:data invoke-args)
-               :headers utils/content-type=json
-               :on-done (fn [{:keys [success? get-parsed-response]}]
-                          (swap! state dissoc :submitting?)
-                          (if success?
-                            (do (modal/pop-modal)
-                                ((:request-refresh props)))
-                            (swap! state assoc :submit-error (get-parsed-response false))))}))))})
+       (let [attributes-seen (utils/log (apply merge (vals (select-keys (:page-attributes @locals) (:pages-stack @state)))))]
+         (when (and set-discoverable? (contains? attributes-seen :library:discoverableByGroups))
+           ;{:name endpoints/save-discoverable-by-groups :data discoverable-by}
+           ;(and (not set-discoverable?) editable?)
+           ;{:name endpoints/save-library-metadata :data data}
+           ;:else {:name endpoints/save-library-metadata :data (merge data discoverable-by)})]
+           (swap! state assoc :submitting-groups? true :submit-error nil)
+           (endpoints/call-ajax-orch
+            {:endpoint (endpoints/save-discoverable-by-groups (:workspace-id props))
+             :payload (:library:discoverableByGroups attributes-seen)
+             :headers utils/content-type=json
+             :on-done (fn [{:keys [success? get-parsed-response]}]
+                        (swap! state dissoc :submitting-groups?)
+                        (if success?
+                          ((:request-refresh props))
+                          (swap! state assoc :submit-error (get-parsed-response false))))}))
+         (when editable?
+           (swap! state assoc :submitting-attributes? true :submit-error nil)
+           (endpoints/call-ajax-orch
+            {:endpoint (endpoints/save-library-metadata (:workspace-id props))
+             :payload (library-utils/remove-empty-values (merge (dissoc attributes-seen :library:discoverableByGroups) (:version-attributes @state)))
+             :headers utils/content-type=json
+             :on-done (fn [{:keys [success? get-parsed-response]}]
+                        (swap! state dissoc :submitting-attributes?)
+                        (if success?
+                          ((:request-refresh props))
+                          (swap! state assoc :submit-error (get-parsed-response false))))}))
+         (modal/pop-modal))))})
+
