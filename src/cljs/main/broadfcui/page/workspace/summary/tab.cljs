@@ -116,7 +116,7 @@
                 derived (merge {:can-share? (:canShare workspace)
                                 :owner? (common/access-greater-than-equal-to? user-access-level "OWNER")
                                 :writer? (common/access-greater-than-equal-to? user-access-level "WRITER")
-                                :catalog-with-read? (and (common/access-greater-than-equal-to? user-access-level "READER") (:catalog workspace))}
+                                :catalog-with-any-access? (and (common/access-greater-than-equal-to? user-access-level "READER") (:catalog workspace))}
                                (utils/restructure user-access-level auth-domain))]
             [:div {:style {:margin "2.5rem 1.5rem" :display "flex"}}
              (when (:sharing? @state)
@@ -136,7 +136,7 @@
      (this :refresh))
    :-render-sidebar
    (fn [{:keys [props state locals refs this]}
-        {:keys [catalog-with-read? owner? writer? can-share?]}]
+        {:keys [catalog-with-any-access? owner? writer? can-share?]}]
      (let [{:keys [workspace workspace-id request-refresh]} props
            {:keys [label-id body-id]} @locals
            {:keys [editing?]
@@ -144,7 +144,7 @@
            {{:keys [isLocked library-attributes description authorizationDomain]} :workspace
             {:keys [runningSubmissionsCount]} :workspaceSubmissionStats} workspace
            status (common/compute-status workspace)
-           publishable? (and curator? (or catalog-with-read? owner?))]
+           publishable? (and curator? (or catalog-with-any-access? owner?))]
        [:div {:style {:flex "0 0 270px" :paddingRight 30}}
         (when (:cloning? @state)
           [create/CreateDialog
@@ -180,7 +180,7 @@
                :data-test-id (config/when-debug "catalog-button")
                :onClick #(modal/push-modal
                           [CatalogWizard (utils/restructure library-schema workspace workspace-id can-share?
-                                                            owner? curator? writer? catalog-with-read? request-refresh)])}])
+                                                            owner? curator? writer? catalog-with-any-access? request-refresh)])}])
            (when (and publishable? (not editing?))
              (let [working-attributes (library-utils/get-initial-attributes workspace)
                    questions (->> (range (count (:wizard library-schema)))
@@ -240,7 +240,7 @@
                                               [DeleteDialog {:workspace-id workspace-id}])}])]}]]))
    :-render-main
    (fn [{:keys [props state locals]}
-        {:keys [user-access-level auth-domain can-share? owner? curator? writer? catalog-with-read?]}]
+        {:keys [user-access-level auth-domain can-share? owner? curator? writer? catalog-with-any-access?]}]
      (let [{:keys [workspace workspace-id bucket-access? request-refresh]} props
            {:keys [editing? server-response]} @state
            {:keys [library-schema]} server-response
@@ -329,7 +329,7 @@
             [comps/Spinner {:text "Loading Dataset Attributes"
                             :style {:marginBottom "2rem"}}]
             [LibraryView (utils/restructure library-attributes library-schema workspace workspace-id
-                                            request-refresh can-share? owner? curator? writer? catalog-with-read?)]))
+                                            request-refresh can-share? owner? curator? writer? catalog-with-any-access?)]))
         [attributes/WorkspaceAttributeViewerEditor
          (merge {:ref "workspace-attribute-editor" :workspace-bucket bucketName}
                 (utils/restructure editing? writer? workspace-attributes workspace-id request-refresh))]]))
