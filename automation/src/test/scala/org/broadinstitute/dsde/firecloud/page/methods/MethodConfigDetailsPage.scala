@@ -60,6 +60,7 @@ class MethodConfigDetailsPage(namespace: String, name: String, methodConfigNames
 
     def openLaunchAnalysisModal(): LaunchAnalysisModal = {
       await enabled methodConfigNameTextQuery
+      //await thenClick(openLaunchAnalysisModalButtonQuery)
       click on (await enabled openLaunchAnalysisModalButtonQuery)
       new LaunchAnalysisModal
     }
@@ -158,6 +159,10 @@ class LaunchAnalysisModal(implicit webDriver: WebDriver) extends FireCloudView {
     ui.clickLaunchButton()
   }
 
+  def verifyNoDefaultEntityMessage(): Boolean = {
+    ui.isNoDefaultEntitiesMessagePresent()
+  }
+
   def verifyWorkflowsWarning(): Boolean = {
     ui.isNumberOfWorkflowWarningPresent()
   }
@@ -184,7 +189,6 @@ class LaunchAnalysisModal(implicit webDriver: WebDriver) extends FireCloudView {
     private val closeModalXButtonQuery: Query = testId("x-button")
     private val numberOfWorkflowsWarningQuery: Query = testId("number-of-workflows-warning")
     private val callCachingCheckboxQuery: Query = testId("call-cache-checkbox")
-    private val selectedEntityQuery: Query = testId("selected-entity")
 
     private val emptyDefaultMessage = "There are no entities to display."
 
@@ -216,9 +220,9 @@ class LaunchAnalysisModal(implicit webDriver: WebDriver) extends FireCloudView {
       click on (await enabled launchAnalysisButtonQuery)
     }
 
-    def getSelectedEntityText(): String = {
-      await enabled selectedEntityQuery
-      find(selectedEntityQuery).fold("")(_.text)
+    def isNoDefaultEntitiesMessagePresent(): Boolean = {
+      await enabled emptyDefaultEntitiesMessageQuery
+      find(emptyDefaultEntitiesMessageQuery).size == 1
     }
 
     def closeModal() = {
