@@ -40,7 +40,7 @@
         (row "Queue status:" (str queued " Queued; " active " Active"))])]))
 
 (defn- render-form [state props]
-  [:div {:style {:width 1000}}
+  [:div {}
    (when (:launching? @state)
      [comps/Blocker {:banner "Launching analysis..."}])
    (style/create-form-label "Select Entity")
@@ -160,8 +160,8 @@
   {:render
    (fn [{:keys [props]}]
      [buttons/Button
-      {:text "Launch Analysis..."
-       :data-test-id "open-launch-analysis-modal-button"
+      {:data-test-id "open-launch-analysis-modal-button"
+       :text "Launch Analysis..."
        :disabled? (:disabled? props)
        :onClick #(modal/push-modal
                   [Form (select-keys props [:config-id :workspace-id
