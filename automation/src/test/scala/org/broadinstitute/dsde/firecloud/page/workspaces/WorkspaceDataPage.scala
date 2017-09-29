@@ -2,7 +2,8 @@ package org.broadinstitute.dsde.firecloud.page.workspaces
 
 import org.broadinstitute.dsde.firecloud.config.Config
 import org.broadinstitute.dsde.firecloud.page.{FireCloudView, PageUtil, Table}
-import org.openqa.selenium.WebDriver
+import org.openqa.selenium.interactions.Actions
+import org.openqa.selenium.{Keys, WebDriver}
 import org.scalatest.selenium.Page
 
 
@@ -24,10 +25,20 @@ class WorkspaceDataPage(namespace: String, name: String)(implicit webDriver: Web
     this
   }
 
+  def hideColumn(header: String) = {
+    if (ui.readColumnHeaders.contains(header)) {
+      ui.showColumnEditor()
+      ui.toggleColumnVisibility(header)
+      ui.hideColumnEditor()
+    }
+  }
+
   trait UI extends super.UI {
     private val dataTable = new Table("entity-table")
 
     private val importMetadataButtonQuery = testId("import-metadata-button")
+    private val columnEditorButtonQuery= testId("columns-button")
+    private val columnHeaderQuery: CssSelectorQuery = testId("column-header")
 
     def hasimportMetadataButton(): Boolean = {
       find(importMetadataButtonQuery).isDefined
@@ -42,6 +53,24 @@ class WorkspaceDataPage(namespace: String, name: String)(implicit webDriver: Web
       // TODO: click on the tab and read the actual table size
       dataTable.readDisplayedTabCount("participant")
     }
+
+    def hideColumnEditor() = {
+      val action = new Actions(webDriver)
+      action.sendKeys(Keys.ESCAPE)
+    }
+
+    def showColumnEditor() = {
+      click on columnEditorButtonQuery
+    }
+
+    def toggleColumnVisibility(header: String) = {
+      click on testId(s"$header-column-toggle")
+    }
+
+    def readColumnHeaders: List[String] = {
+      readAllText(columnHeaderQuery)
+    }
+
   }
   object ui extends UI
 }
