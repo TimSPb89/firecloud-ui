@@ -1,10 +1,12 @@
 package org.broadinstitute.dsde.firecloud.test.e2e
 
 import java.util.UUID
+
 import org.broadinstitute.dsde.firecloud.config.Config
 import org.broadinstitute.dsde.firecloud.fixture.{MethodData, TestData, WorkspaceFixtures}
 import org.broadinstitute.dsde.firecloud.page.workspaces.methodconfigs.WorkspaceMethodConfigListPage
-import org.broadinstitute.dsde.firecloud.page.workspaces.{WorkspaceDataPage, WorkspaceSummaryPage}
+import org.broadinstitute.dsde.firecloud.page.workspaces.WorkspaceDataPage
+import org.broadinstitute.dsde.firecloud.page.workspaces.summary.WorkspaceSummaryPage
 import org.broadinstitute.dsde.firecloud.test.WebBrowserSpec
 import org.scalatest._
 import org.broadinstitute.dsde.firecloud.test.Tags
@@ -23,7 +25,7 @@ class SmoketestSpec extends FreeSpec with WebBrowserSpec with WorkspaceFixtures 
     val workspaceName = "Smoketests_create_" + randomUuid
     val detailPage = listPageAsUser.createWorkspace(billingProject, workspaceName).awaitLoaded()
 
-    detailPage.ui.readWorkspace shouldEqual (billingProject, workspaceName)
+    detailPage.readWorkspace shouldEqual (billingProject, workspaceName)
     listPageAsUser.open
     listPageAsUser.filter(workspaceName)
     listPageAsUser.ui.hasWorkspace(billingProject, workspaceName) shouldBe true
