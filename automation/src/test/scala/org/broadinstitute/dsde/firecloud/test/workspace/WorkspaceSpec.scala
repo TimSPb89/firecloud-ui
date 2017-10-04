@@ -98,8 +98,8 @@ class WorkspaceSpec extends FreeSpec with WebBrowserSpec with WorkspaceFixtures 
             val listPage = signIn(Config.Users.harry)
             val detailPage = listPage.openWorkspaceDetails(billingProject, workspaceName)
             val aclEditor = detailPage.openShareDialog(Config.Users.ron.email, "WRITER")
-            aclEditor.ui.canComputeEnabled() shouldBe true
-            aclEditor.ui.canComputeChecked() shouldBe false
+            aclEditor.canComputeEnabled shouldBe true
+            aclEditor.canComputeChecked shouldBe false
           }
         }
       }
@@ -112,8 +112,8 @@ class WorkspaceSpec extends FreeSpec with WebBrowserSpec with WorkspaceFixtures 
           val listPage = signIn(Config.Users.harry)
           val detailPage = listPage.openWorkspaceDetails(billingProject, workspaceName)
           val aclEditor = detailPage.openShareDialog(Config.Users.ron.email, "OWNER")
-          aclEditor.ui.canComputeEnabled() shouldBe false
-          aclEditor.ui.canComputeChecked() shouldBe true
+          aclEditor.canComputeEnabled shouldBe false
+          aclEditor.canComputeChecked shouldBe true
         }
       }
       //reader permissions should always be false
@@ -125,8 +125,8 @@ class WorkspaceSpec extends FreeSpec with WebBrowserSpec with WorkspaceFixtures 
           val listPage = signIn(Config.Users.harry)
           val detailPage = listPage.openWorkspaceDetails(billingProject, workspaceName)
           val aclEditor = detailPage.openShareDialog(Config.Users.ron.email, "READER")
-          aclEditor.ui.canComputeEnabled() shouldBe false
-          aclEditor.ui.canComputeChecked() shouldBe false
+          aclEditor.canComputeEnabled shouldBe false
+          aclEditor.canComputeChecked shouldBe false
         }
       }
 
