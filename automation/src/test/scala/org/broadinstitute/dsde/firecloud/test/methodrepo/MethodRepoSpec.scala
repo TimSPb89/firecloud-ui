@@ -56,7 +56,6 @@ class MethodRepoSpec extends FreeSpec with WebBrowserSpec with Matchers with Cle
 
       // go in and redact it
       val methodDetailPage = methodRepoTable.enterMethod(namespace, name)
-      methodDetailPage.awaitLoaded()
       methodDetailPage.ui.redact()
 
       // and verify that it's gone
