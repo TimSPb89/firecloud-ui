@@ -13,28 +13,22 @@ class MethodRepoSpec extends FreeSpec with WebBrowserSpec with Matchers with Cle
   "A user" - {
     "should be able to create a method and see it in the table" in withWebDriver { implicit driver =>
       signIn(Config.Users.hermione)
-      val methodRepoPage = new MethodRepoPage()
-      val methodRepoTable = methodRepoPage.ui.MethodRepoTable
-      methodRepoPage.open
-      methodRepoPage.ui.clickNewMethodButton()
+      val methodRepoPage = new MethodRepoPage().open
 
       // create it
-      val createDialog = new CreateMethodModal()
       val name = "TEST-CREATE-" + randomUuid
       val attributes = MethodData.SimpleMethod.creationAttributes + ("name" -> name)
       val namespace = attributes("namespace")
-      createDialog.createMethod(attributes)
+      methodRepoPage.createNewMethod(attributes)
       register cleanUp api.methods.redact(namespace, name, 1)
 
-      // wait for it to finish, then go back to the method repo page
-      createDialog.awaitDismissed()
+
+      // go back to the method repo page and verify that it's in the table
       methodRepoPage.open
+      methodRepoPage.MethodRepoTable.goToTab("My Methods")
+      methodRepoPage.MethodRepoTable.filter(name)
 
-      // verify that it's in the table
-      methodRepoTable.goToTab("My Methods")
-      methodRepoTable.filter(name)
-
-      methodRepoTable.hasMethod(namespace, name) shouldBe true
+      methodRepoPage.MethodRepoTable.hasMethod(namespace, name) shouldBe true
     }
 
     "should be able to redact a method that they own" in withWebDriver { implicit driver =>
@@ -44,23 +38,21 @@ class MethodRepoSpec extends FreeSpec with WebBrowserSpec with Matchers with Cle
       api.methods.createMethod(attributes)
 
       signIn(Config.Users.hermione)
-      val methodRepoPage = new MethodRepoPage()
-      val methodRepoTable = methodRepoPage.ui.MethodRepoTable
-      methodRepoPage.open
+      val methodRepoPage = new MethodRepoPage().open
 
       // verify that it's in the table
-      methodRepoTable.goToTab("My Methods")
-      methodRepoTable.filter(name)
+      methodRepoPage.MethodRepoTable.goToTab("My Methods")
+      methodRepoPage.MethodRepoTable.filter(name)
 
-      methodRepoTable.hasMethod(namespace, name) shouldBe true
+      methodRepoPage.MethodRepoTable.hasMethod(namespace, name) shouldBe true
 
       // go in and redact it
-      val methodDetailPage = methodRepoTable.enterMethod(namespace, name)
-      methodDetailPage.ui.redact()
+      val methodDetailPage = methodRepoPage.MethodRepoTable.enterMethod(namespace, name)
+      methodDetailPage.redact()
 
       // and verify that it's gone
       methodRepoPage.open
-      methodRepoTable.hasMethod(namespace, name) shouldBe false
+      methodRepoPage.MethodRepoTable.hasMethod(namespace, name) shouldBe false
     }
   }
 }

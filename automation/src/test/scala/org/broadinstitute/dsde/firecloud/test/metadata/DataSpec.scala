@@ -19,10 +19,10 @@ class DataSpec extends FlatSpec with WebBrowserSpec with ParallelTestExecution w
     api.workspaces.create(billingProject, wsName)
     register cleanUp api.workspaces.delete(billingProject, wsName)
 
-    val workspaceListPage = signIn(Config.Users.testUser.email, Config.Users.testUser.password)
+    signIn(Config.Users.testUser.email, Config.Users.testUser.password)
     val workspaceDataTab = new WorkspaceDataPage(billingProject, wsName).open
     workspaceDataTab.importFile(filename)
-    assert(workspaceDataTab.getNumberOfParticipants() == 1)
+    workspaceDataTab.getNumberOfParticipants shouldBe 1
 
     //more checks should be added here
   }

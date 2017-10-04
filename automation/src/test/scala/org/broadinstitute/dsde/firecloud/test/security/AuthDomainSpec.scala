@@ -53,16 +53,12 @@ class AuthDomainSpec extends FreeSpec /*with ParallelTestExecution*/ with Matche
 
               val cloneWorkspaceName = workspaceName + "_clone"
               val cloneModal = summaryPage.ui.clickCloneButton()
-              cloneModal.ui.readLockedAuthDomainGroups() should contain(authDomainName)
+              cloneModal.readLockedAuthDomainGroups() should contain(authDomainName)
 
               register cleanUp {
                 api.workspaces.delete(projectName, cloneWorkspaceName)(AuthTokens.george)
               }
-              cloneModal.cloneWorkspace(projectName, cloneWorkspaceName)
-              cloneModal.cloneWorkspaceWait()
-              summaryPage.cloneWorkspaceWait()
-
-              val cloneSummaryPage = new WorkspaceSummaryPage(projectName, cloneWorkspaceName)
+              val cloneSummaryPage = cloneModal.cloneWorkspace(projectName, cloneWorkspaceName)
               cloneSummaryPage.validateWorkspace shouldEqual true
               cloneSummaryPage.ui.readAuthDomainGroups should include(authDomainName)
             }
@@ -186,17 +182,13 @@ class AuthDomainSpec extends FreeSpec /*with ParallelTestExecution*/ with Matche
 
                 val cloneWorkspaceName = workspaceName + "_clone"
                 val cloneModal = summaryPage.ui.clickCloneButton()
-                cloneModal.ui.readLockedAuthDomainGroups() should contain(groupOneName)
-                cloneModal.ui.readLockedAuthDomainGroups() should contain(groupTwoName)
+                cloneModal.readLockedAuthDomainGroups() should contain(groupOneName)
+                cloneModal.readLockedAuthDomainGroups() should contain(groupTwoName)
 
                 register cleanUp {
                   api.workspaces.delete(projectName, cloneWorkspaceName)(AuthTokens.george)
                 }
-                cloneModal.cloneWorkspace(projectName, cloneWorkspaceName)
-                cloneModal.cloneWorkspaceWait()
-                summaryPage.cloneWorkspaceWait()
-
-                val cloneSummaryPage = new WorkspaceSummaryPage(projectName, cloneWorkspaceName)
+                val cloneSummaryPage = cloneModal.cloneWorkspace(projectName, cloneWorkspaceName)
                 cloneSummaryPage.validateWorkspace shouldEqual true
                 cloneSummaryPage.ui.readAuthDomainGroups should include(groupOneName)
                 cloneSummaryPage.ui.readAuthDomainGroups should include(groupTwoName)
