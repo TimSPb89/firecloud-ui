@@ -51,11 +51,11 @@ class MethodConfigSpec extends FreeSpec with WebBrowserSpec with CleanUp with Wo
       val methodConfigDetailsPage = new WorkspaceMethodConfigDetailsPage(billingProject, workspaceName, MethodData.SimpleMethodConfig.configNamespace, methodConfigName).open
       methodConfigDetailsPage.editMethodConfig(newRootEntityType = Some("sample"))
 
-      val launchModal = methodConfigDetailsPage.openlaunchModal()
+      val launchModal = methodConfigDetailsPage.openLaunchModal()
       launchModal.filterRootEntityType("sample_set")
       launchModal.searchAndSelectEntity(TestData.HundredAndOneSampleSet.entityId)
       assert(launchModal.verifyWorkflowsWarning())
-      launchModal.closeModal()
+      launchModal.xOut()
     }
   }
 
@@ -70,12 +70,12 @@ class MethodConfigSpec extends FreeSpec with WebBrowserSpec with CleanUp with Wo
       val methodConfigDetailsPage = new WorkspaceMethodConfigDetailsPage(billingProject, workspaceName, MethodData.SimpleMethodConfig.configNamespace, methodConfigName).open
       methodConfigDetailsPage.editMethodConfig(newRootEntityType = Some("sample"))
 
-      val launchModal = methodConfigDetailsPage.openlaunchModal()
+      val launchModal = methodConfigDetailsPage.openLaunchModal()
       launchModal.filterRootEntityType("participant")
       launchModal.searchAndSelectEntity(TestData.SingleParticipant.entityId)
       launchModal.clickLaunchButton()
       assert(launchModal.verifyWrongEntityError(wrongRootEntityErrorText))
-      launchModal.closeModal()
+      launchModal.xOut()
     }
   }
 
@@ -93,12 +93,12 @@ class MethodConfigSpec extends FreeSpec with WebBrowserSpec with CleanUp with Wo
       val methodConfigDetailsPage = new WorkspaceMethodConfigDetailsPage(billingProject, workspaceName, MethodData.SimpleMethodConfig.configNamespace, methodConfigName).open
       methodConfigDetailsPage.editMethodConfig(newRootEntityType = Some("sample"))
 
-      val launchModal = methodConfigDetailsPage.openlaunchModal()
+      val launchModal = methodConfigDetailsPage.openLaunchModal()
       launchModal.filterRootEntityType("sample_set")
       launchModal.searchAndSelectEntity(TestData.HundredAndOneSampleSet.entityId)
       launchModal.clickLaunchButton()
       assert(launchModal.verifyWrongEntityError(noExpressionErrorText))
-      launchModal.closeModal()
+      launchModal.xOut()
     }
   }
 
@@ -114,12 +114,12 @@ class MethodConfigSpec extends FreeSpec with WebBrowserSpec with CleanUp with Wo
       signIn(uiUser)
       val methodConfigDetailsPage = new WorkspaceMethodConfigDetailsPage(billingProject, workspaceName, method.methodNamespace, methodConfigName).open
 
-      val launchModal = methodConfigDetailsPage.openlaunchModal()
+      val launchModal = methodConfigDetailsPage.openLaunchModal()
       launchModal.filterRootEntityType(method.rootEntityType)
       launchModal.searchAndSelectEntity(TestData.SingleParticipant.entityId)
       launchModal.clickLaunchButton()
       assert(launchModal.verifyMissingInputsError(missingInputsErrorText))
-      launchModal.closeModal()
+      launchModal.xOut()
     }
   }
 
