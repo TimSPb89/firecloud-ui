@@ -63,7 +63,7 @@ class PublishSpec extends FreeSpec with WebBrowserSpec with CleanUp {
 
         signIn(Config.Users.curator)
         val page = new DataLibraryPage().open
-        assert(page.ui.hasDataset(wsName))
+        assert(page.hasDataset(wsName))
       }
       "should be able to be unpublished" in withWebDriver { implicit driver =>
         val wsName = "PublishSpec_curator_unpublish_" + randomUuid
@@ -84,7 +84,7 @@ class PublishSpec extends FreeSpec with WebBrowserSpec with CleanUp {
         Thread sleep 200
 
         val libraryPage = new DataLibraryPage().open
-        assert(!libraryPage.ui.hasDataset(wsName))
+        assert(!libraryPage.hasDataset(wsName))
       }
 
     }

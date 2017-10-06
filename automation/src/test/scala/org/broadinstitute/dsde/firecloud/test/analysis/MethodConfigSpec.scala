@@ -213,8 +213,7 @@ class MethodConfigSpec extends FreeSpec with WebBrowserSpec with CleanUp with Wo
       val methodConfigDetailsPage = new WorkspaceMethodConfigDetailsPage(billingProject, workspaceName, MethodData.SimpleMethodConfig.configNamespace, methodConfigName).open
       val workspaceMethodConfigPage = methodConfigDetailsPage.deleteMethodConfig()
 
-      workspaceMethodConfigPage.filter(methodConfigName)
-      assert(find(methodConfigName).isEmpty)
+      assert(!workspaceMethodConfigPage.hasConfig(methodConfigName))
     }
   }
 
@@ -224,17 +223,17 @@ class MethodConfigSpec extends FreeSpec with WebBrowserSpec with CleanUp with Wo
         withConfigForRedactedMethodInWorkspace("MethodConfigTabSpec_redacted_choose_new_snapshot", billingProject, workspaceName, true) { configName =>
           signIn(uiUser)
           val methodConfigDetailsPage = new WorkspaceMethodConfigDetailsPage(billingProject, workspaceName, MethodData.SimpleMethodConfig.configNamespace, configName).open
-          assert(methodConfigDetailsPage.ui.isSnapshotRedacted())
+          assert(methodConfigDetailsPage.isSnapshotRedacted)
 
-          methodConfigDetailsPage.ui.openEditMode()
-          methodConfigDetailsPage.ui.saveEdits("disabled")
+          methodConfigDetailsPage.openEditMode()
+          methodConfigDetailsPage.saveEdits(expectSuccess = false)
           val messageModal = MessageModal()
           assert(messageModal.validateLocation)
-          messageModal.clickCancel()
+          messageModal.cancel()
 
-          methodConfigDetailsPage.ui.changeSnapshotId(2)
-          methodConfigDetailsPage.ui.saveEdits()
-          assert(!methodConfigDetailsPage.ui.isSnapshotRedacted())
+          methodConfigDetailsPage.changeSnapshotId(2)
+          methodConfigDetailsPage.saveEdits()
+          assert(!methodConfigDetailsPage.isSnapshotRedacted)
         }
       }
     }
@@ -243,9 +242,9 @@ class MethodConfigSpec extends FreeSpec with WebBrowserSpec with CleanUp with Wo
         withConfigForRedactedMethodInWorkspace("MethodConfigTabSpec_redacted_launch_analysis_error", billingProject, workspaceName, true) { configName =>
           signIn(uiUser)
           val methodConfigDetailsPage = new WorkspaceMethodConfigDetailsPage(billingProject, workspaceName, MethodData.SimpleMethodConfig.configNamespace, configName).open
-          assert(methodConfigDetailsPage.ui.isSnapshotRedacted())
+          assert(methodConfigDetailsPage.isSnapshotRedacted)
 
-          methodConfigDetailsPage.ui.openLaunchAnalysisModal()
+          methodConfigDetailsPage.clickLaunchAnalysis()
           val messageModalModal = MessageModal()
           assert(messageModalModal.validateLocation)
           messageModalModal.clickCancel()
@@ -257,16 +256,16 @@ class MethodConfigSpec extends FreeSpec with WebBrowserSpec with CleanUp with Wo
         withConfigForRedactedMethodInWorkspace("MethodConfigTabSpec_redacted_delete", billingProject, workspaceName, false) { configName =>
           signIn(uiUser)
           val methodConfigDetailsPage = new WorkspaceMethodConfigDetailsPage(billingProject, workspaceName, MethodData.SimpleMethodConfig.configNamespace, configName).open
-          assert(methodConfigDetailsPage.ui.isSnapshotRedacted())
+          assert(methodConfigDetailsPage.isSnapshotRedacted)
 
-          methodConfigDetailsPage.ui.openEditMode()
+          methodConfigDetailsPage.openEditMode()
           val messageModal = MessageModal()
           assert(messageModal.validateLocation)
           messageModal.clickCancel()
 
-          methodConfigDetailsPage.ui.deleteMethodConfig()
-          val list = new WorkspaceMethodConfigListPage(billingProject, workspaceName)
-          assert(!list.ui.hasConfig(configName))
+          methodConfigDetailsPage.deleteMethodConfig()
+          val list = await ready new WorkspaceMethodConfigListPage(billingProject, workspaceName)
+          assert(!list.hasConfig(configName))
         }
       }
     }
