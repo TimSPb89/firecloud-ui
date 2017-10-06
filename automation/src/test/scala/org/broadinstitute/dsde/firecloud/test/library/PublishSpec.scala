@@ -28,9 +28,8 @@ class PublishSpec extends FreeSpec with WebBrowserSpec with CleanUp {
           register cleanUp api.workspaces.delete(namespace, wsName)
 
           signIn(Config.Users.curator)
-          val page = new WorkspaceSummaryPage(namespace, wsName)
-          page.open
-          page.ui.clickPublishButton()
+          val page = new WorkspaceSummaryPage(namespace, wsName).open
+          page.clickPublishButton()
           val messageModal = MessageModal()
           assert(messageModal.validateLocation)
         }
@@ -43,9 +42,8 @@ class PublishSpec extends FreeSpec with WebBrowserSpec with CleanUp {
           register cleanUp api.workspaces.delete(namespace, wsName)
 
           signIn(Config.Users.curator)
-          val page = new WorkspaceSummaryPage(namespace, wsName)
-          page.open
-          assert(page.ui.hasPublishButton)
+          val page = new WorkspaceSummaryPage(namespace, wsName).open
+          assert(page.hasPublishButton)
         }
       }
     }
@@ -100,9 +98,8 @@ class PublishSpec extends FreeSpec with WebBrowserSpec with CleanUp {
             api.library.setLibraryAttributes(namespace, wsName, LibraryData.metadata)(ronAuthToken)
 
             signIn(Config.Users.ron)
-            val page = new WorkspaceSummaryPage(namespace, wsName)
-            page.open
-            assert(!page.ui.hasPublishButton)
+            val page = new WorkspaceSummaryPage(namespace, wsName).open
+            assert(!page.hasPublishButton)
           }
         }
       }

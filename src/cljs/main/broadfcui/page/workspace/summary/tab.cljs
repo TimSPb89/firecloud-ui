@@ -178,93 +178,96 @@
                          :data-top-anchor (str label-id ":bottom")
                          :data-btm-anchor (str body-id ":bottom")}
           :contents
-          [:div {:style {:width 270}}
-           (when-not (and library-schema billing-projects (some? curator?))
-             (comps/render-blocker "Loading..."))
-           (when (and can-share? (not editing?))
-             [buttons/SidebarButton
-              {:data-test-id "share-workspace-button"
-               :style :light :margin :top :color :button-primary
-               :text "Share..." :icon :share
-               :onClick #(swap! state assoc :sharing? true)}])
-           (when (not editing?)
-             [buttons/SidebarButton
-              {:data-test-id "catalog-button"
-               :style :light :color :button-primary :margin :top
-               :icon :catalog :text "Catalog Dataset..."
-               :onClick #(modal/push-modal
-                          [CatalogWizard (utils/restructure library-schema workspace workspace-id can-share?
-                                                            owner? curator? writer? catalog-with-read? request-refresh)])}])
-           (when (and publishable? (not editing?))
-             (let [working-attributes (library-utils/get-initial-attributes workspace)
-                   questions (->> (range (count (:wizard library-schema)))
-                                  (map (comp first (partial library-utils/get-questions-for-page working-attributes library-schema)))
-                                  (apply concat))
-                   required-attributes (library-utils/find-required-attributes library-schema)]
-               (if (:library:published library-attributes)
-                 [publish/UnpublishButton (utils/restructure workspace-id request-refresh)]
-                 [publish/PublishButton
-                  (merge (utils/restructure workspace-id request-refresh)
-                         {:disabled? (cond (empty? library-attributes)
-                                           "Dataset attributes must be created before publishing."
-                                           (seq (library-utils/validate-required
-                                                 (library-utils/remove-empty-values working-attributes)
-                                                 questions required-attributes))
-                                           "All required dataset attributes must be set before publishing.")})])))
-
-           (when (or owner? writer?)
-             (if (not editing?)
+          (let [ready? (and library-schema billing-projects (some? curator?))]
+            [:div {:data-test-id "sidebar"
+                   :data-test-state (if ready? "ready" "loading")
+                   :style {:width 270}}
+             (when-not ready?
+               (comps/render-blocker "Loading..."))
+             (when (and can-share? (not editing?))
                [buttons/SidebarButton
-                {:style :light :color :button-primary :margin :top
-                 :text "Edit" :icon :edit
-                 :onClick #(swap! state assoc :editing? true)}]
-               [:div {}
-                [buttons/SidebarButton
-                 {:style :light :color :button-primary :margin :top
-                  :text "Save" :icon :done
-                  :onClick (fn [_]
-                             (let [{:keys [success error]} ((@refs "workspace-attribute-editor") :get-attributes)
-                                   new-description ((@refs "description") :get-text)
-                                   new-tags ((@refs "tags-autocomplete") :get-tags)]
-                               (if error
-                                 (comps/push-error error)
-                                 (this :-save-attributes (assoc success :description new-description :tag:tags new-tags)))))}]
-                [buttons/SidebarButton
-                 {:style :light :color :exception-state :margin :top
-                  :text "Cancel Editing" :icon :cancel
-                  :onClick #(swap! state dissoc :editing?)}]]))
-           (when-not editing?
-             [buttons/SidebarButton
-              {:data-test-id "open-clone-workspace-modal-button"
-               :style :light :margin :top :color :button-primary
-               :text "Clone..." :icon :clone
-               :disabled? (when (empty? billing-projects) (comps/no-billing-projects-message))
-               :onClick #(swap! state assoc :cloning? true)}])
-           (when (and owner? (not editing?))
-             [buttons/SidebarButton
-              {:style :light :margin :top :color :button-primary
-               :text (if isLocked "Unlock" "Lock")
-               :icon (if isLocked :unlock :lock)
-               :onClick #(this :-lock-or-unlock isLocked)}])
-           (when (and owner? (not editing?))
-             (let [published? (:library:published library-attributes)
-                   publisher? (and curator? (or catalog-with-read? owner?))]
+                {:data-test-id "share-workspace-button"
+                 :style :light :margin :top :color :button-primary
+                 :text "Share..." :icon :share
+                 :onClick #(swap! state assoc :sharing? true)}])
+             (when (not editing?)
                [buttons/SidebarButton
-                {:data-test-id "delete-workspace-button"
-                 :style :light :margin :top :color (if isLocked :text-lighter :exception-state)
-                 :text "Delete" :icon :delete
-                 :disabled? (cond isLocked
-                                  "This workspace is locked."
-                                  (and published? (not publisher?))
-                                  {:type :error :header "Alert" :icon-color :warning-state
-                                   :text [:div {}
-                                          [:p {:style {:margin 0}}
-                                           "This workspace is published in the Data Library and cannot be deleted. "
-                                           "Contact a library curator to ask them to first unpublish the workspace."]
-                                          [:p {}
-                                           "If you are unable to contact a curator, contact help@firecloud.org."]]})
+                {:data-test-id "catalog-button"
+                 :style :light :color :button-primary :margin :top
+                 :icon :catalog :text "Catalog Dataset..."
                  :onClick #(modal/push-modal
-                            [DeleteDialog (utils/restructure workspace-id published?)])}]))]}]]))
+                            [CatalogWizard (utils/restructure library-schema workspace workspace-id can-share?
+                                                              owner? curator? writer? catalog-with-read? request-refresh)])}])
+             (when (and publishable? (not editing?))
+               (let [working-attributes (library-utils/get-initial-attributes workspace)
+                     questions (->> (range (count (:wizard library-schema)))
+                                    (map (comp first (partial library-utils/get-questions-for-page working-attributes library-schema)))
+                                    (apply concat))
+                     required-attributes (library-utils/find-required-attributes library-schema)]
+                 (if (:library:published library-attributes)
+                   [publish/UnpublishButton (utils/restructure workspace-id request-refresh)]
+                   [publish/PublishButton
+                    (merge (utils/restructure workspace-id request-refresh)
+                           {:disabled? (cond (empty? library-attributes)
+                                             "Dataset attributes must be created before publishing."
+                                             (seq (library-utils/validate-required
+                                                   (library-utils/remove-empty-values working-attributes)
+                                                   questions required-attributes))
+                                             "All required dataset attributes must be set before publishing.")})])))
+
+             (when (or owner? writer?)
+               (if (not editing?)
+                 [buttons/SidebarButton
+                  {:style :light :color :button-primary :margin :top
+                   :text "Edit" :icon :edit
+                   :onClick #(swap! state assoc :editing? true)}]
+                 [:div {}
+                  [buttons/SidebarButton
+                   {:style :light :color :button-primary :margin :top
+                    :text "Save" :icon :done
+                    :onClick (fn [_]
+                               (let [{:keys [success error]} ((@refs "workspace-attribute-editor") :get-attributes)
+                                     new-description ((@refs "description") :get-text)
+                                     new-tags ((@refs "tags-autocomplete") :get-tags)]
+                                 (if error
+                                   (comps/push-error error)
+                                   (this :-save-attributes (assoc success :description new-description :tag:tags new-tags)))))}]
+                  [buttons/SidebarButton
+                   {:style :light :color :exception-state :margin :top
+                    :text "Cancel Editing" :icon :cancel
+                    :onClick #(swap! state dissoc :editing?)}]]))
+             (when-not editing?
+               [buttons/SidebarButton
+                {:data-test-id "open-clone-workspace-modal-button"
+                 :style :light :margin :top :color :button-primary
+                 :text "Clone..." :icon :clone
+                 :disabled? (when (empty? billing-projects) (comps/no-billing-projects-message))
+                 :onClick #(swap! state assoc :cloning? true)}])
+             (when (and owner? (not editing?))
+               [buttons/SidebarButton
+                {:style :light :margin :top :color :button-primary
+                 :text (if isLocked "Unlock" "Lock")
+                 :icon (if isLocked :unlock :lock)
+                 :onClick #(this :-lock-or-unlock isLocked)}])
+             (when (and owner? (not editing?))
+               (let [published? (:library:published library-attributes)
+                     publisher? (and curator? (or catalog-with-read? owner?))]
+                 [buttons/SidebarButton
+                  {:data-test-id "delete-workspace-button"
+                   :style :light :margin :top :color (if isLocked :text-lighter :exception-state)
+                   :text "Delete" :icon :delete
+                   :disabled? (cond isLocked
+                                    "This workspace is locked."
+                                    (and published? (not publisher?))
+                                    {:type :error :header "Alert" :icon-color :warning-state
+                                     :text [:div {}
+                                            [:p {:style {:margin 0}}
+                                             "This workspace is published in the Data Library and cannot be deleted. "
+                                             "Contact a library curator to ask them to first unpublish the workspace."]
+                                            [:p {}
+                                             "If you are unable to contact a curator, contact help@firecloud.org."]]})
+                   :onClick #(modal/push-modal
+                              [DeleteDialog (utils/restructure workspace-id published?)])}]))])}]]))
    :-render-main
    (fn [{:keys [props state locals]}
         {:keys [user-access-level auth-domain can-share? owner? curator? writer? catalog-with-read?]}]
